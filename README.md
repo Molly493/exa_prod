@@ -67,7 +67,7 @@ Ejecuta este comando desde el directorio raíz para construir la aplicación (`a
 
 ```bash
 docker compose up -d --build
-
+```
 ### 2.3. Acceso a Interfaces
 
 Una vez levantada la infraestructura, puedes acceder a los siguientes servicios clave:
@@ -78,5 +78,6 @@ Una vez levantada la infraestructura, puedes acceder a los siguientes servicios 
 | **Jenkins** | `http://localhost:8090` | Primer login requiere el código del log |
 | **Grafana** | `http://localhost:3000` | admin/admin |
 | **Kibana** | `http://localhost:5601` | N/A |
+
 
 
