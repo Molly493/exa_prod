@@ -1,131 +1,41 @@
-# docker-compose.yml
 version: '3.8'
 
-volumes:
-  jenkins_home:
-  prometheus_data:
-  grafana_data:
-  # Opcional: Para ELK
-  elasticsearch_data:
-  vault_file:
-
 services:
-  # --- 1. Aplicación Spring Boot (Auth Service) ---
-  auth-service:
-    
+  app:
+    image: app-demo
     build:
       context: .
       dockerfile: Dockerfile
-    image: auth-service:latest
     ports:
-      - "8080:8080"
+      - "8081:8081"  # Mapea el puerto 8081 del contenedor al puerto 8081 del host
     environment:
-      # Variables de entorno para la aplicación, p. ej., puerto, base de datos
-      SPRING_PROFILES_ACTIVE: prod
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8080/actuator/health"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-    # Prometheus - recolecta las métricas de Actuator
-    # El endpoint es /actuator/prometheus
-    labels:
-      - prometheus.io/scrape=true
-      - prometheus.io/path=/actuator/prometheus
-      - prometheus.io/port=8080
-      - prometheus.io/job=auth-service
+      - SPRING_PROFILES_ACTIVE=prod
+    networks:
+      - monitoring
 
-  # --- 2. Servidor CI/CD (Jenkins) ---
-  jenkins:
-    image: jenkins/jenkins:lts
-    privileged: true
-    user: root
-    ports:
-      - "8090:8080" # Puerto de la interfaz web
-      - "50000:50000" # Puerto para agentes (si se usan)
-    volumes:
-      - jenkins_home:/var/jenkins_home
-      # Montar Docker Socket para permitir a Jenkins construir imágenes
-      - /var/run/docker.sock:/var/run/docker.sock
-
-  # --- 3. Monitoreo (Prometheus) ---
   prometheus:
-    image: prom/prometheus:latest
+    image: prom/prometheus
     ports:
       - "9090:9090"
     volumes:
-      # Montar la configuración personalizada de Prometheus
-      - ./infra/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
-      - prometheus_data:/prometheus
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml
     command:
       - '--config.file=/etc/prometheus/prometheus.yml'
-    depends_on:
-      - auth-service
+    networks:
+      - monitoring
 
-  # --- 4. Visualización (Grafana) ---
   grafana:
-    image: grafana/grafana:latest
+    image: grafana/grafana
     ports:
       - "3000:3000"
     volumes:
-      - grafana_data:/var/lib/grafana
-    depends_on:
-      - prometheus
-      - auth-service
-
-  # --- 5. Balanceador de Carga (Nginx) ---
-  load-balancer:
-    image: nginx:latest
-    ports:
-      - "80:80" # Puerto público
-    volumes:
-      - ./infra/nginx/nginx.conf:/etc/nginx/nginx.conf
-    depends_on:
-      - auth-service
-
-# --- Opcionales ---
-
-  # --- 6. Gestión de Secretos (Vault) ---
-  vault:
-    image: vault:latest
-    ports:
-      - "8200:8200"
-    volumes:
-      - vault_file:/vault/file
+      - ./grafana-dashboards:/etc/grafana/provisioning/dashboards
+      - ./grafana-datasources:/etc/grafana/provisioning/datasources
     environment:
-      VAULT_DEV_ROOT_TOKEN_ID: "myroottoken"
-      VAULT_DEV_LISTEN_ADDRESS: "0.0.0.0:8200"
-    cap_add:
-      - IPC_LOCK
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+    networks:
+      - monitoring
 
-  # --- 7. Recolector de Logs (Filebeat) ---
-  filebeat:
-    image: docker.elastic.co/beats/filebeat:8.12.2
-    volumes:
-      - ./infra/filebeat/filebeat.yml:/usr/share/filebeat/filebeat.yml
-      # Montar el socket de Docker para obtener logs de otros contenedores
-      - /var/lib/docker/containers:/var/lib/docker/containers:ro
-      - /var/run/docker.sock:/var/run/docker.sock
-    depends_on:
-      - elasticsearch
-
-  # --- 8. Almacén de Logs (Elasticsearch) ---
-  elasticsearch:
-    image: docker.elastic.co/elasticsearch/elasticsearch:8.12.2
-    environment:
-      - discovery.type=single-node
-      - xpack.security.enabled=false
-    ports:
-      - "9200:9200"
-    volumes:
-      - elasticsearch_data:/usr/share/elasticsearch/data
-
-  # --- 9. Visualización de Logs (Kibana) ---
-  kibana:
-    image: docker.elastic.co/kibana/kibana:8.12.2
-    ports:
-      - "5601:5601"
-    environment:
-      ELASTICSEARCH_HOSTS: '["http://elasticsearch:9200"]'
-    depends_on:
-      - elasticsearch
+networks:
+  monitoring:
+    driver: bridge

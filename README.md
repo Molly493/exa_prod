@@ -1,83 +1,115 @@
-# 🌟 Proyecto Final: Plataforma Local de CI/CD, Observabilidad y Seguridad (DevSecOps)
+# Proyecto Spring Boot con Prometheus y Grafana
 
-## 🎯 Objetivo del Proyecto
+## **Requisitos**
 
-Diseñar e implementar una infraestructura local y auto-contenida para el ciclo de vida de un servicio **Spring Boot (Auth Service)**. La plataforma simula un entorno de producción, integrando Continuous Integration/Continuous Delivery (CI/CD), Observabilidad (Logs y Métricas), Seguridad (DevSecOps) y operaciones básicas de alta disponibilidad/escalabilidad.
+- Java 17
+- Maven 3.x
+- Docker y Docker Compose (opcional, para ejecutar Prometheus y Grafana)
 
-## 1. 🏗️ Arquitectura de la Solución
+## **Ejecución del Proyecto**
 
-La solución se basa completamente en **Docker Compose** para orquestar la aplicación y todos los servicios de infraestructura.
+### **1. Ejecutar la Aplicación Spring Boot**
 
-### 1.1. Componentes del Stack
-
-| Categoría | Servicio | Herramienta | Puerto Expuesto (Host) |
-| :--- | :--- | :--- | :--- |
-| **Aplicación** | `auth-service` | Spring Boot (Maven) | 8080 (Interno) |
-| **Balanceo** | `load-balancer` | Nginx | **80** |
-| **CI/CD** | `jenkins` | Jenkins | **8090** |
-| **Seguridad** | `vault` | HashiCorp Vault | **8200** |
-| **Métricas** | `prometheus` | Prometheus | **9090** |
-| **Visualización** | `grafana` | Grafana | **3000** |
-| **Logs** | `elasticsearch` | ELK Stack | **9200** |
-| **Visualización Logs** | `kibana` | ELK Stack | **5601** |
-
-### 1.2. Estructura del Repositorio
-
- ```
-.
-├── auth-service-project/
-│   ├── src/
-│   ├── pom.xml
-│   └── Dockerfile      
-├── infra/
-│   ├── prometheus/prometheus.yml
-│   ├── nginx/nginx.conf
-│   └── filebeat/filebeat.yml
-├── Jenkinsfile
-└── docker-compose.yml
- ```
-
-## 2. 📝 Instrucciones de Despliegue
-
-### 2.1. Prerrequisitos
-
-* Docker y Docker Compose (o Docker Engine con Compose CLI).
-* Maven (para la construcción local si se requiere, pero el pipeline usa Maven dentro del contenedor Jenkins).
-
-### 2.2. Inicialización de Vault (SETUP)
-
-Para que el *pipeline* pueda acceder a los secretos, primero hay que escribirlos en Vault:
-
-1.  Levantar el servicio Vault:
-    ```bash
-    docker compose up -d vault
-    ```
-2.  Acceder al contenedor de Vault e inicializar el secreto (usando el token de desarrollo `myroottoken`):
-    ```bash
-    docker exec -it vault sh
-    vault login myroottoken
-    vault secrets enable -version=2 secret 
-    vault kv put secret/app/config DB_PASSWORD=SecretParaJenkins123
-    exit
-    ```
-
-### 2.3. Ejecución Completa de la Infraestructura
-
-Ejecuta este comando desde el directorio raíz para construir la aplicación (`auth-service`) y levantar todos los servicios:
+Para ejecutar la aplicación, usa el siguiente comando:
 
 ```bash
-docker compose up -d --build
+./mvnw spring-boot:run
 ```
-### 2.3. Acceso a Interfaces
 
-Una vez levantada la infraestructura, puedes acceder a los siguientes servicios clave:
+La aplicación estará disponible en:
 
-| Interfaz | URL Local | Credenciales por Defecto |
-| :--- | :--- | :--- |
-| **Aplicación (LB)** | `http://localhost:80` | N/A |
-| **Jenkins** | `http://localhost:8090` | Primer login requiere el código del log |
-| **Grafana** | `http://localhost:3000` | admin/admin |
-| **Kibana** | `http://localhost:5601` | N/A |
+```
+http://localhost:8081
+```
 
+### **2. Endpoints Disponibles**
 
+#### **Hello World:**
+- **GET /hello**
+- Devuelve un mensaje de "Hello, World!".
+- Ejemplo: [http://localhost:8081/hello](http://localhost:8081/hello)
 
+#### **Métricas de Prometheus:**
+- **GET /actuator/prometheus**
+- Expone métricas en formato Prometheus.
+- Ejemplo: [http://localhost:8081/actuator/prometheus](http://localhost:8081/actuator/prometheus)
+
+---
+
+## **Métricas Personalizadas**
+
+El proyecto incluye las siguientes métricas personalizadas:
+
+- **Contador de Líneas de Log:**
+  - Nombre: `log_lines_emitted`
+  - Descripción: Número de líneas de log emitidas por la aplicación.
+
+- **Contador de Peticiones:**
+  - Nombre: `http_requests_total`
+  - Descripción: Número total de peticiones procesadas.
+
+- **Histograma de Latencia:**
+  - Nombre: `http_request_duration_seconds`
+  - Descripción: Latencia de las peticiones HTTP.
+
+---
+
+## **Despliegue con Docker Compose**
+
+El proyecto incluye un archivo `docker-compose.yml` para desplegar la aplicación junto con Prometheus y Grafana.
+
+### **1. Construir la Imagen de la Aplicación**
+
+Primero, construye la imagen Docker de la aplicación:
+
+```bash
+docker build -t my-spring-boot-app .
+```
+
+### **2. Ejecutar los Servicios**
+
+Ejecuta los servicios con Docker Compose:
+
+```bash
+docker-compose up
+```
+
+Los servicios estarán disponibles en:
+
+- **Spring Boot:** [http://localhost:8081](http://localhost:8081)
+- **Prometheus:** [http://localhost:9090](http://localhost:9090)
+- **Grafana:** [http://localhost:3000](http://localhost:3000)
+
+### **3. Configurar Grafana**
+
+Accede a Grafana en [http://localhost:3000](http://localhost:3000).
+
+Inicia sesión con las credenciales predeterminadas:
+
+- **Usuario:** `admin`
+- **Contraseña:** `admin`
+
+Importa el dashboard de Grafana proporcionado en el proyecto para visualizar las métricas.
+
+---
+
+## **Estructura del Proyecto**
+
+```
+src/
+└── main/
+    ├── java/
+    │   └── com/
+    │       └── example/
+    │           └── demo/
+    │               ├── DemoApplication.java       (Clase principal)
+    │               └── controller/
+    │                   └── HelloController.java  (Controlador)
+    └── resources/
+        ├── application.properties                (Configuración de la aplicación)
+        └── static/                               (Archivos estáticos)
+```
+
+---
+
+## **Contribuir**
