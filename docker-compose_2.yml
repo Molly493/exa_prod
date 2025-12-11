@@ -2,7 +2,7 @@ version: '3.8'
 
 services:
   app:
-    image: app-demo
+    # image: app-demo  # QUITA ESTA LÍNEA para evitar pull innecesario
     build:
       context: .
       dockerfile: Dockerfile
@@ -34,7 +34,7 @@ services:
       - GF_SECURITY_ADMIN_PASSWORD=admin
     networks:
       - monitoring
-  node_exporter:  # Servicio agregado para monitoreo del host
+  node_exporter:
     image: quay.io/prometheus/node-exporter:latest
     container_name: node_exporter
     restart: unless-stopped
