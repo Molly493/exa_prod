@@ -1,5 +1,6 @@
 package com.example.demo.controller;
 
+import com.example.demo.dto.Item;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -11,14 +12,14 @@ public class HelloController {
 
     private static final Logger logger = LoggerFactory.getLogger(HelloController.class);
 
-    /*@Autowired
-    private ItemService itemService;
+    @PostMapping("/items")
+    public ResponseEntity<ResponseMessage> addItem(@RequestBody Item item) {
+        logger.info("Llamando a ItemService para guardar el item: {}", item.getTexto());
+        ResponseMessage responseMessage = new ResponseMessage("archivo guardado", "okresponse");
+        return ResponseEntity.ok(responseMessage); //
+    }
 
-    @PostMapping
-    public Item addItem(@RequestBody Item item){
-        logger.info("Llamando a ItemService para guardar el item: {}", item);
-        return itemService.guardar(producto);
-    }*/
+
     @GetMapping("/hello")
     public ResponseEntity<?> hello(@RequestParam(required = false) Integer number) {
         logger.info("Servicio get Hello World con parámetro number: {}", number);
