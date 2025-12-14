@@ -1,4 +1,6 @@
 # Proyecto Spring Boot con Prometheus y Grafana
+# incluyendo monitoreo de logs
+
 
 ## **Requisitos**
 
@@ -92,8 +94,11 @@ Inicia sesión con las credenciales predeterminadas:
 Importa el dashboard de Grafana proporcionado en el proyecto para visualizar las métricas.
 
 ---
+### **4. Arquitectura **
+![Imagen arquitectura](./arquitectura.png)
 
-## **Estructura del Proyecto**
+## **Estructura del Proyecto Spring boot**
+
 
 ```
 src/
@@ -112,4 +117,5 @@ src/
 
 ---
 
-## **Contribuir**
+## **Evidencia**
+  Archivo PDF [Ver el PDF](./Evidencia.pdf)
