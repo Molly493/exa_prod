@@ -99,11 +99,6 @@
 						</goals>
 					</execution>
 				</executions>
-				<configuration>
-					<archive>
-						<manifestFile>src/main/resources/META-INF/MANIFEST.MF</manifestFile>
-					</archive>
-				</configuration>
 			</plugin>
 		</plugins>
 	</build>

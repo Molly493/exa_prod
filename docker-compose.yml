@@ -2,7 +2,7 @@ version: '3.8'
 
 services:
   app:
-    image: app-demo 
+    # image: app-demo  
     build:
       context: .
       dockerfile: Dockerfile
@@ -12,6 +12,14 @@ services:
       - SPRING_PROFILES_ACTIVE=prod
     networks:
       - monitoring
+      
+  zipkin:
+    image: openzipkin/zipkin:latest
+    ports:
+      - "9411:9411"
+    networks:
+      - monitoring
+        
   prometheus:
     image: prom/prometheus
     ports:
@@ -22,6 +30,7 @@ services:
       - '--config.file=/etc/prometheus/prometheus.yml'
     networks:
       - monitoring
+
   grafana:
     image: grafana/grafana
     ports:
@@ -34,6 +43,7 @@ services:
       - GF_SECURITY_ADMIN_PASSWORD=admin
     networks:
       - monitoring
+
   node_exporter:
     image: quay.io/prometheus/node-exporter:latest
     container_name: node_exporter
