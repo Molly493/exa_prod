@@ -42,18 +42,21 @@ http://localhost:8081
 
 El proyecto incluye las siguientes métricas personalizadas:
 
-- **Contador de Líneas de Log:**
-  - Nombre: `log_lines_emitted`
-  - Descripción: Número de líneas de log emitidas por la aplicación.
-
+- **Contador de http response:**
+  - Nombre: `http_response_size_bytes_sum`
+  - Descripción: Número de peticiones procesadas por tipo por la aplicación.
+  - Query: `prometheus_http_response_size_bytes_sum`
+![Imagen Metrica 1](./Metrica01.png)
 - **Contador de Peticiones:**
   - Nombre: `http_requests_total`
   - Descripción: Número total de peticiones procesadas.
-
+  - Query: `prometheus_http_requests_total` 
+![Imagen Metrica 2](./Metrica02.png)
 - **Histograma de Latencia:**
   - Nombre: `http_request_duration_seconds`
   - Descripción: Latencia de las peticiones HTTP.
-
+  - Query: `http_server_requests_seconds_count`
+![Imagen Metrica 3](./Metrica03.png)
 ---
 
 ## **Despliegue con Docker Compose**
@@ -93,8 +96,10 @@ Inicia sesión con las credenciales predeterminadas:
 
 Importa el dashboard de Grafana proporcionado en el proyecto para visualizar las métricas.
 
+Plantilla JSON [Ver el JSON](./plantillaGrafana.pdf)
+
 ---
-### **4. Arquitectura **
+### **4. Arquitectura**
 ![Imagen arquitectura](./arquitectura.png)
 
 ## **Estructura del Proyecto Spring boot**
